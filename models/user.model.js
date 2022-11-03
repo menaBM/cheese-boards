@@ -5,7 +5,8 @@ class User extends Model{}
 
 User.init({
     name: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        primaryKey: true
     },
     email:{
         type: DataTypes.STRING

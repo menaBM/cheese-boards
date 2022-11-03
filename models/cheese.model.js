@@ -5,7 +5,8 @@ class Cheese extends Model{}
 
 Cheese.init({
     title: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        primaryKey: true
     },
     description:{
         type: DataTypes.STRING

@@ -5,7 +5,8 @@ class Board extends Model{}
 
 Board.init({
     type: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        primaryKey: true
     },
     description:{
         type: DataTypes.STRING
