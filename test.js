@@ -152,3 +152,67 @@ describe("testing the associations", ()=>{
         expect(array.length).toBe(4)
     })
 })
+
+describe("testing the eager loading", ()=>{
+    
+    test("a board can be loaded with it's cheeses", async ()=>{
+        const test = (await Board.findOne({
+            attributes:["type"],
+            where : {type : "type 4"},
+            include: {
+                model: Cheese,
+                attributes: ["title"],
+                through: {
+                    attributes: []
+                }
+            }
+        })).get({plain: true})
+
+        let titles = []
+        test.Cheeses.forEach(element => { titles.push(element.title)})
+        expect(titles).toEqual([ 'Parmesan', 'Cheddar', 'Asiago', 'Gruyere' ])
+    })
+
+    test("a user can be loaded with it's boards", async() =>{
+        
+        const allBoards = await Board.findAll()
+        const user = await User.create({
+            name: "emily",
+            email: "emily@email.com"
+        })
+        
+        await user.addBoards(allBoards)
+        const emily = (await User.findOne({
+            where:{name:"emily"},
+            attributes:["name"],
+            include: {
+                model: Board,
+                attributes: ["type"]
+            }
+        })).get({plain: true})
+
+        let types = []
+        emily.Boards.forEach(element => { types.push(element.type)})
+        expect(types).toEqual([ 'type 1', 'type 2', 'type 3', 'type 4' ])
+    })
+
+    test("a cheese can be loaded with it's boards", async() =>{
+        
+        const allBoards = await Board.findAll()
+        const cheese = await Cheese.findOne()
+        await cheese.addBoards(allBoards)
+        
+        const cheese1 = (await Cheese.findOne({
+            where: {title: "Pecorino"},
+            attributes:["title"],
+            include: {
+                model: Board,
+                attributes: ["type"]
+            }
+        })).get({plain: true})
+
+        let types = []
+        cheese1.Boards.forEach(element => { types.push(element.type)})
+        expect(types).toEqual([ 'type 1', 'type 2', 'type 3', 'type 4' ])
+    })    
+})
