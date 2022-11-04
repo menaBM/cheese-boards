@@ -76,10 +76,15 @@ describe("testing the models", ()=>{
 })
 
 describe("testing the associations", ()=>{
-    test("multiple boards can be added to a user", async ()=>{
-        await seed()
+    
+    let user;
+    let boards;
+
+    beforeAll(async()=>{
         
-        const user = await User.create({
+        await seed()
+
+        user = await User.create({
             name: "emily",
             email: "emily@email.com"
         })
@@ -101,38 +106,27 @@ describe("testing the associations", ()=>{
                 rating: 4
             }
         ])
-
+    }) 
+    
+    test("multiple boards can be added to a user", async ()=>{
         await user.addBoards(boards)
         const array = await user.getBoards()
         expect(array.length).toBe(3)
     })  
+
+    test("a board is linked to the correct user", async () =>{
+        let board1 = await Board.findByPk("type 1") 
+        let name =  (await board1.getUser()).get({plain:true})
+        expect(name.name).toBe("emily")
+    })
         
 
     test("a cheese can be added to many boards", async ()=>{
-        await seed()
        
         cheese = await Cheese.create({
             title: "Pecorino",
             description: "Comes in large cylinders with a hard, yellow rind encasing a yellowish-white interior"
         })
-
-        boards = await Board.bulkCreate([
-            {
-                type: "type 1",
-                description: "a very fancy cheeseboard",
-                rating: 7
-            },
-            {
-                type: "type 2",
-                description: "a not very good cheeseboard",
-                rating: 2
-            },
-            {
-                type: "type 3",
-                description: "an ok cheeseboard",
-                rating: 4
-            }
-        ])
 
         await cheese.addBoards(boards)
         const array = await cheese.getBoards()
@@ -195,9 +189,8 @@ describe("testing the eager loading", ()=>{
     test("a user can be loaded with its boards", async() =>{
         
         const allBoards = await Board.findAll()
-        const user = await User.create({
-            name: "emily",
-            email: "emily@email.com"
+        const user = await User.findOne({
+            where: {name: "emily"}
         })
         
         await user.addBoards(allBoards)
