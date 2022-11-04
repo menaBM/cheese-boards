@@ -2,10 +2,9 @@ const {User, Board,  Cheese} = require('./models')
 const seed = require("./db/seed")
 
 describe("testing the models", ()=>{
+    
     test("creating a user", async () => {
-        
         await seed()
-        
         await User.create({
             name: "emily",
             email: "emily@email.com"
@@ -120,27 +119,29 @@ describe("testing the associations", ()=>{
         expect(name.name).toBe("emily")
     })
         
-
     test("a cheese can be added to many boards", async ()=>{
-       
-        cheese = await Cheese.create({
+        const cheese = await Cheese.create({
             title: "Pecorino",
             description: "Comes in large cylinders with a hard, yellow rind encasing a yellowish-white interior"
         })
-
         await cheese.addBoards(boards)
         const array = await cheese.getBoards()
         expect(array.length).toBe(3)
     })
 
+    test("a board is linked to the correct cheese", async ()=>{
+        let pecorino = await Cheese.findByPk("Pecorino")
+        let array = await pecorino.getBoards()
+        let cheese = (await array[0].getCheeses()).map(cheese => cheese.get({plain:true}))
+        expect(cheese[0]).toHaveProperty("title", "Pecorino")
+    })
+
     test("a board can have many cheeses", async ()=>{
-       
         const board = await Board.create({
             type: "type 4",
             description: "an amazing cheeseboard",
             rating: 10
         })
-
         const cheeses = await Cheese.bulkCreate([
             {
                 title: "Parmesan",
@@ -159,10 +160,16 @@ describe("testing the associations", ()=>{
                 description: "Gruyère is a firm yellow Swiss cheese. It is named after the town of Gruyères in Switzerland. Gruyère is generally aged for six months or longer and is made from whole cow's milk. It features very few small eyes (or holes), an unusual characteristic for Swiss cheese."
             }      
         ])
-
         await board.addCheeses(cheeses)
         const array = await board.getCheeses()
         expect(array.length).toBe(4)
+    })
+
+    test("a cheese is linked to the correct board", async ()=>{
+        let board4 = await Board.findByPk("type 4")
+        let array = await board4.getCheeses()
+        let board = (await array[0].getBoards()).map(cheese => cheese.get({plain:true}))
+        expect(board[0]).toHaveProperty("type", "type 4")
     })
 })
 
@@ -187,7 +194,6 @@ describe("testing the eager loading", ()=>{
     })
 
     test("a user can be loaded with its boards", async() =>{
-        
         const allBoards = await Board.findAll()
         const user = await User.findOne({
             where: {name: "emily"}
@@ -209,7 +215,6 @@ describe("testing the eager loading", ()=>{
     })
 
     test("a cheese can be loaded with its boards", async() =>{
-        
         const allBoards = await Board.findAll()
         const cheese = await Cheese.findOne()
         await cheese.addBoards(allBoards)
