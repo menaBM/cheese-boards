@@ -14,6 +14,12 @@ describe("testing the models", ()=>{
         expect(emily.email).toBe("emily@email.com")
     })
 
+    test("a user has name and email attributes", async ()=>{
+        const emily =  (await User.findByPk("emily")).get({plain:true})
+        expect(emily).toHaveProperty("name")
+        expect(emily).toHaveProperty("email")
+    })
+
     test("deleting a user", async () => {
         const emily =  await User.findByPk("emily")
         await emily.destroy()
@@ -31,6 +37,13 @@ describe("testing the models", ()=>{
         expect(board1.rating).toBe(7)
     })
 
+    test("a board has type, description and rating attributes", async ()=>{
+        const board =  (await Board.findByPk("type 1")).get({plain:true})
+        expect(board).toHaveProperty("type")
+        expect(board).toHaveProperty("description")
+        expect(board).toHaveProperty("rating")
+    })
+
     test("deleting a board", async () => {
         const board =  await Board.findByPk("type 1")
         await board.destroy()
@@ -45,6 +58,12 @@ describe("testing the models", ()=>{
         })
         const Cheese1 =  await Cheese.findByPk("Pecorino")
         expect(Cheese1.description).toBe("Comes in large cylinders with a hard, yellow rind encasing a yellowish-white interior")
+    })
+
+    test("a cheese has title and description attributes", async ()=>{
+        const cheese =  (await Cheese.findByPk("Pecorino")).get({plain:true})
+        expect(cheese).toHaveProperty("title")
+        expect(cheese).toHaveProperty("description")
     })
 
     test("deleting a Cheese", async () => {
@@ -155,7 +174,7 @@ describe("testing the associations", ()=>{
 
 describe("testing the eager loading", ()=>{
     
-    test("a board can be loaded with it's cheeses", async ()=>{
+    test("a board can be loaded with its cheeses", async ()=>{
         const test = (await Board.findOne({
             attributes:["type"],
             where : {type : "type 4"},
@@ -173,7 +192,7 @@ describe("testing the eager loading", ()=>{
         expect(titles).toEqual([ 'Parmesan', 'Cheddar', 'Asiago', 'Gruyere' ])
     })
 
-    test("a user can be loaded with it's boards", async() =>{
+    test("a user can be loaded with its boards", async() =>{
         
         const allBoards = await Board.findAll()
         const user = await User.create({
@@ -196,7 +215,7 @@ describe("testing the eager loading", ()=>{
         expect(types).toEqual([ 'type 1', 'type 2', 'type 3', 'type 4' ])
     })
 
-    test("a cheese can be loaded with it's boards", async() =>{
+    test("a cheese can be loaded with its boards", async() =>{
         
         const allBoards = await Board.findAll()
         const cheese = await Cheese.findOne()
